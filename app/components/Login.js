@@ -17,7 +17,6 @@ var Login = React.createClass({
     }
   },
   onSignIn: function() {
-    console.log(this.props);
     var {dispatch, fields: {email, password}} = this.props;
     this.setState({
       loading: true
@@ -43,8 +42,7 @@ var Login = React.createClass({
     var {fields: {email, password}} = this.props;
 
     var renderError = (field) => {
-      console.log(field);
-      if (field && field.touched && field.error) {
+      if (field.touched && field.error) {
         return (
           <Text style={styles.formError}>{field.error}</Text>
         )
