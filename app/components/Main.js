@@ -7,31 +7,28 @@ import {
   NavigatorIOS
 } from 'react-native';
 
-import {unauthUser} from '../actions';
-// import TodoList from './TodoList';
+// import {unauthUser} from '../actions';
+// onLogout: function() {
+//   this.props.dispatch(unauthUser);
+// },
+// <TouchableOpacity onPress={this.onLogout}>
+//   <Text>
+//     Logout
+//   </Text>
+// </TouchableOpacity>
 
-// <NavigatorIOS
-//   initialRoute={{
-//     component: TodoList,
-//     title: 'Todo List',
-//     navigationBarHidden: true
-//   }}
-//   style={{flex: 1}}/>
-
+import TodoList from './TodoList';
 
 var Main = React.createClass({
-  
-  onLogout: function() {
-    this.props.dispatch(unauthUser);
-  },
-  
   render() {
     return (
-      <TouchableOpacity onPress={this.onLogout}>
-        <Text>
-          Logout
-        </Text>
-      </TouchableOpacity>
+      <NavigatorIOS
+        initialRoute={{
+          component: TodoList,
+          title: 'Todo List',
+          navigationBarHidden: true
+        }}
+        style={{flex: 1}}/>
     );
   }
 });
