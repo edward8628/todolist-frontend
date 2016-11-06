@@ -7,96 +7,74 @@ import {
   View,
   TouchableOpacity,
   ScrollView,
-  RefreshControl
+  RefreshControl,
+  TextInput
 } from 'react-native';
 
-import {unauthUser} from '../actions';
-import NewTodo from './NewTodo';
-
-var TodoItem = connect()(React.createClass({
-  getInitialState() {
-    return {
-      deleting: false
-    }
-  },
-  onDelete() {
-    this.setState({deleting: true});
-    this.props.dispatch(deleteTodo(this.props.id));
-  },
-  render() {
-    var renderDeleteButton = () => {
-      if (!this.state.deleting) {
-        return (
-          <TouchableOpacity onPress={this.onDelete}>
-            <Icon name="x" size={15} color='#2ecc71'/>
-          </TouchableOpacity>
-        )
-      }
-    }
-    return (
-      <View style={styles.todoContainer}>
-        <Text>{this.props.text}</Text>
-        {renderDeleteButton()}
-      </View>
-    )
-  }
-}));
+import {createTodo} from '../actions';
 
 var TodoList = React.createClass({
   getInitialState() {
     return {
-      refreshing: false
+      newTodoText: undefined,
+      loading: false
     }
   },
-  onLogout() {
-    this.props.dispatch(setTodos([]));
-    this.props.dispatch(unauthUser);
-  },
   addNewTodo() {
-    this.props.navigator.push({
-      component: NewTodo,
-      title: 'New Todo',
-      navigationBarHidden: true
-    })
+    var {newTodoText} = this.state;
+    var {dispatch} = this.props;
+    if (newTodoText && newTodoText != "") {
+      this.setState({loading: true});
+      dispatch(createTodo(newTodoText)).then(() => {
+        this.setState({loading: false});
+        this.props.navigator.pop();
+      });
+    }
   },
-  onRefresh() {
-    this.setState({refreshing: true});
-    this.props.dispatch(getTodos).then(() => {
-      this.setState({refreshing: false});
-    })
+  onBack() {
+    this.props.navigator.pop();
   },
   render() {
-    console.log("todos", this.props.todos);
-    var renderTodos = () => {
-      return this.props.todos.map((todo) => {
+    var renderScrollViewOrLoading = () => {
+      if (this.state.loading) {
         return (
-          <TodoItem key={todo._id} text={todo.text} id={todo._id}/>
-        )
-      })
+          <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+            <Text>
+              Creating todo...
+            </Text>
+          </View>
+        );
+      } else {
+        return (
+          <ScrollView
+            automaticallyAdjustContentInsets={false}
+            contentContainerStyle={styles.scrollViewContainer}>
+            <View style={styles.inputContainer}>
+              <TextInput
+                onChangeText={(newTodoText) => {
+                  this.setState({newTodoText})
+                }}
+                placeholder="New To-Do Text"
+                style={styles.input}/>
+            </View>
+          </ScrollView>
+        );
+      }
     }
     return (
       <View style={styles.container}>
         <View style={styles.topBar}>
-          <TouchableOpacity onPress={this.onLogout}>
-            <Icon name="x" size={20} color="white"/>
+          <TouchableOpacity onPress={this.onBack}>
+            <Icon name="chevron-left" size={20} color="white"/>
           </TouchableOpacity>
           <Text style={styles.title}>
-            To-Do List
+            New To-Do
           </Text>
           <TouchableOpacity onPress={this.addNewTodo}>
-            <Icon name="plus" size={20} color="white"/>
+            <Icon name="check" size={20} color="white"/>
           </TouchableOpacity>
         </View>
-        <ScrollView
-          refreshControl={
-            <RefreshControl
-              refreshing={this.state.refreshing}
-              onRefresh={this.onRefresh}/>
-          }
-          automaticallyAdjustContentInsets={false}
-          contentContainerStyle={styles.scrollViewContainer}>
-          {renderTodos()}
-        </ScrollView>
+        {renderScrollViewOrLoading()}
       </View>
     );
   }
@@ -121,15 +99,16 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 20
   },
-  todoContainer: {
-    padding: 16,
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    marginTop: -1,
-    borderColor: '#ccc',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center'
+  inputContainer: {
+    padding: 5,
+    paddingLeft: 10,
+    margin: 10,
+    borderWidth: 2,
+    borderRadius: 10,
+    borderColor: "#2ecc71"
+  },
+  input: {
+    height: 26
   }
 });
 
